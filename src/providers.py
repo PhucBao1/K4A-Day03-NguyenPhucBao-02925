@@ -35,28 +35,48 @@ class MockOfflineProvider(BaseLLMProvider):
         return f"[Mock Chatbot Response]: Xin chào! Tôi đã nhận được câu hỏi '{prompt}'. (Chế độ Chatbot không có Tool tra cứu dữ liệu thời gian thực)."
 
     def generate_with_tools(self, prompt: str, tools_schema: List[Dict[str, Any]], system_prompt: str = "") -> Dict[str, Any]:
+        import re
         prompt_lower = prompt.lower()
-        
+
+        date_match = re.search(r"\d{2}/\d{2}/\d{4}", prompt)
+        date_str = date_match.group(0) if date_match else "20/09/2026"
+
+        destination = "Đà Nẵng"
+        if "phú quốc" in prompt_lower:
+            destination = "Phú Quốc"
+        elif "atlantis" in prompt_lower:
+            destination = "Atlantis"
+        elif "đà nẵng" in prompt_lower:
+            destination = "Đà Nẵng"
+
         # Mô phỏng nhận diện intent gọi Tool
-        if "sv2026001" in prompt_lower and "đặt lịch" in prompt_lower:
+        is_policy_question = any(kw in prompt_lower for kw in ["chính sách", "hủy vé", "hoàn tiền"])
+
+        if not is_policy_question and "đặt" in prompt_lower and ("vé" in prompt_lower or "phòng" in prompt_lower):
+            flight_match = re.search(r"\b([A-Z]{2}\d{2,4})\b", prompt)
             return {
                 "type": "tool_call",
-                "tool_name": "schedule_appointment",
-                "arguments": {"student_id": "SV2026001", "datetime_str": "14:00 15/09/2026", "advisor_name": "PGS.TS Nguyễn Văn A"},
-                "thought": "Người dùng yêu cầu đặt lịch hẹn tư vấn cho sinh viên SV2026001. Tôi sẽ gọi tool schedule_appointment."
+                "tool_name": "book_travel",
+                "arguments": {
+                    "destination": destination,
+                    "date": date_str,
+                    "traveler_name": "Nguyễn Phúc Bảo",
+                    "flight_id": flight_match.group(1) if flight_match else None
+                },
+                "thought": f"Người dùng yêu cầu đặt vé/phòng đi {destination} ngày {date_str}. Tôi sẽ gọi tool book_travel."
             }
-        elif "sv2026001" in prompt_lower or "tra cứu" in prompt_lower:
+        elif "tra cứu" in prompt_lower or "chuyến bay" in prompt_lower or "khách sạn" in prompt_lower:
             return {
                 "type": "tool_call",
-                "tool_name": "academic_query",
-                "arguments": {"student_id": "SV2026001"},
-                "thought": "Người dùng muốn tra cứu thông tin học vụ của sinh viên SV2026001. Tôi sẽ gọi tool academic_query."
+                "tool_name": "search_travel_options",
+                "arguments": {"destination": destination, "date": date_str},
+                "thought": f"Người dùng muốn tra cứu chuyến bay/khách sạn đi {destination} ngày {date_str}. Tôi sẽ gọi tool search_travel_options."
             }
         else:
             return {
                 "type": "text",
-                "content": f"[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-                "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool."
+                "content": "[Mock Agent Response]: Chính sách của chúng tôi cho phép hủy vé miễn phí trước 24 giờ khởi hành; sau thời điểm đó sẽ áp dụng phí hủy theo hạng vé.",
+                "thought": "Câu hỏi chung về chính sách du lịch, trả lời trực tiếp không cần gọi Tool."
             }
 
 
@@ -187,7 +207,8 @@ class OpenAIProvider(BaseLLMProvider):
                 model=self.model_name,
                 messages=messages,
                 tools=tools if tools else None,
-                tool_choice="auto" if tools else None
+                tool_choice="auto" if tools else None,
+                temperature=0.2
             )
 
             msg = response.choices[0].message

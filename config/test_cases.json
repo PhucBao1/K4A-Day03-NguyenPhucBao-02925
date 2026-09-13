@@ -1,0 +1,37 @@
+[
+  {
+    "id": "TC01",
+    "type": "direct_query",
+    "question": "Chào bạn, chính sách hủy vé/hoàn tiền cơ bản của dịch vụ đặt vé du lịch này như thế nào?",
+    "expected_behavior": "Chatbot trả lời trực tiếp từ System Prompt, không cần gọi bất kỳ Tool nào.",
+    "complexity": "Low"
+  },
+  {
+    "id": "TC02",
+    "type": "single_tool_query",
+    "question": "Hãy tra cứu các chuyến bay đi Đà Nẵng vào ngày 20/09/2026.",
+    "expected_behavior": "Agent nhận diện nhu cầu tra cứu, tự động phát sinh Tool Call 'search_travel_options' với điểm đến 'Đà Nẵng' và ngày '20/09/2026'.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC03",
+    "type": "booking_action",
+    "question": "Đặt cho tôi vé máy bay chuyến VN209 đi Đà Nẵng ngày 20/09/2026 dưới tên hành khách Nguyễn Phúc Bảo.",
+    "expected_behavior": "Agent tự động phát sinh Tool Call 'book_travel' với đúng chuyến bay, ngày đi và tên hành khách.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC04",
+    "type": "multi_step_reasoning",
+    "question": "Tôi là Nguyễn Phúc Bảo, muốn đi du lịch Phú Quốc vào ngày 25/09/2026, hãy tìm chuyến bay phù hợp rồi đặt vé luôn cho tôi.",
+    "expected_behavior": "Agent thực hiện chuỗi suy luận ReAct: tra cứu chuyến bay đi Phú Quốc ngày 25/09/2026 trước, sau đó tiến hành đặt vé cho chuyến bay tìm được.",
+    "complexity": "High"
+  },
+  {
+    "id": "TC05",
+    "type": "edge_case_handling",
+    "question": "Hãy tra cứu chuyến bay đi thành phố Atlantis vào ngày 01/01/2099.",
+    "expected_behavior": "Agent nhận kết quả NOT_FOUND từ Tool (điểm đến không tồn tại) và đưa ra phản hồi lịch sự, chính xác, không bịa đặt dữ liệu chuyến bay.",
+    "complexity": "Medium"
+  }
+]

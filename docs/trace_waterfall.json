@@ -1,29 +1,149 @@
 [
   {
     "step": 1,
-    "query": "Chào bạn, bạn có thể giới thiệu quy chế học vụ cơ bản của Đại học VinUni không?",
+    "query": "Chào bạn, chính sách hủy vé/hoàn tiền cơ bản của dịch vụ đặt vé du lịch này như thế nào?",
     "action_type": "FINAL_ANSWER",
-    "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool.",
-    "output": "[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-    "latency_ms": 2845.93
+    "thought": "OpenAI phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Chào bạn! Chính sách hủy vé và hoàn tiền thường phụ thuộc vào từng hãng hàng không hoặc nhà cung cấp dịch vụ mà bạn đặt vé. Tuy nhiên, một số quy định cơ bản thường gặp bao gồm:\n\n1. **Hủy vé trước ngày bay**: Nhiều hãng hàng không cho phép hủy vé trước một khoảng thời gian nhất định (thường là từ 24 đến 48 giờ trước giờ bay) với một khoản phí hủy.\n\n2. **Hoàn tiền**: Nếu vé của bạn đủ điều kiện hoàn tiền, bạn sẽ nhận lại một phần hoặc toàn bộ số tiền đã thanh toán, tùy thuộc vào loại vé (vé thường, vé khuyến mãi, vé linh hoạt, v.v.).\n\n3. **Không hoàn tiền**: Một số vé, đặc biệt là vé khuyến mãi, có thể không được hoàn tiền hoặc chỉ được hoàn tiền một phần.\n\n4. **Thay đổi lịch trình**: Nếu bạn muốn thay đổi ngày bay, có thể có phí thay đổi và sự chênh lệch giá vé.\n\nĐể có thông tin chính xác hơn, bạn nên kiểm tra chính sách cụ thể của hãng hàng không hoặc dịch vụ mà bạn đang sử dụng. Nếu bạn cần hỗ trợ đặt vé hoặc có câu hỏi cụ thể hơn, hãy cho tôi biết!",
+    "latency_ms": 3207.77
   },
   {
     "step": 1,
-    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001.",
+    "query": "Hãy tra cứu các chuyến bay đi Đà Nẵng vào ngày 20/09/2026.",
     "action_type": "TOOL_EXECUTION",
-    "tool_name": "academic_query",
+    "tool_name": "search_travel_options",
     "arguments": {
-      "student_id": "SV2026001"
+      "destination": "Đà Nẵng",
+      "date": "20/09/2026"
     },
-    "observation": {},
-    "latency_ms": 799.12
+    "observation": {
+      "status": "SUCCESS",
+      "destination": "Đà Nẵng",
+      "date": "20/09/2026",
+      "data": {
+        "flights": [
+          {
+            "flight_id": "VN209",
+            "airline": "Vietnam Airlines",
+            "departure_time": "08:00",
+            "price_vnd": 1850000,
+            "seats_available": 12
+          }
+        ],
+        "hotels": [
+          {
+            "hotel_id": "DN-HL01",
+            "name": "Danang Beach Resort",
+            "price_per_night_vnd": 1200000,
+            "rooms_available": 5
+          }
+        ]
+      }
+    },
+    "latency_ms": 1019.26
   },
   {
     "step": 2,
-    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001.",
+    "query": "Hãy tra cứu các chuyến bay đi Đà Nẵng vào ngày 20/09/2026.",
     "action_type": "FINAL_ANSWER",
     "thought": "Tổng hợp kết quả từ MCP Server thành công.",
-    "output": "Chưa thể trả lời chi tiết do chưa nhận được dữ liệu từ MCP Server (hãy hoàn thành TODO 2.1).",
+    "output": "Kết quả tra cứu chuyến đi tới Đà Nẵng ngày 20/09/2026: {\"flights\": [{\"flight_id\": \"VN209\", \"airline\": \"Vietnam Airlines\", \"departure_time\": \"08:00\", \"price_vnd\": 1850000, \"seats_available\": 12}], \"hotels\": [{\"hotel_id\": \"DN-HL01\", \"name\": \"Danang Beach Resort\", \"price_per_night_vnd\": 1200000, \"rooms_available\": 5}]}",
+    "latency_ms": 10.0
+  },
+  {
+    "step": 1,
+    "query": "Đặt cho tôi vé máy bay chuyến VN209 đi Đà Nẵng ngày 20/09/2026 dưới tên hành khách Nguyễn Phúc Bảo.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "book_travel",
+    "arguments": {
+      "destination": "Đà Nẵng",
+      "date": "20/09/2026",
+      "traveler_name": "Nguyễn Phúc Bảo",
+      "flight_id": "VN209"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "booking_id": "BK-VN209-20092026",
+      "destination": "Đà Nẵng",
+      "date": "20/09/2026",
+      "traveler_name": "Nguyễn Phúc Bảo",
+      "flight_id": "VN209",
+      "message": "Đặt vé chuyến bay VN209 thành công cho hành khách Nguyễn Phúc Bảo đi Đà Nẵng vào ngày 20/09/2026."
+    },
+    "latency_ms": 1342.44
+  },
+  {
+    "step": 2,
+    "query": "Đặt cho tôi vé máy bay chuyến VN209 đi Đà Nẵng ngày 20/09/2026 dưới tên hành khách Nguyễn Phúc Bảo.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Tổng hợp kết quả từ MCP Server thành công.",
+    "output": "Đặt vé chuyến bay VN209 thành công cho hành khách Nguyễn Phúc Bảo đi Đà Nẵng vào ngày 20/09/2026.",
+    "latency_ms": 10.0
+  },
+  {
+    "step": 1,
+    "query": "Tôi là Nguyễn Phúc Bảo, muốn đi du lịch Phú Quốc vào ngày 25/09/2026, hãy tìm chuyến bay phù hợp rồi đặt vé luôn cho tôi.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "search_travel_options",
+    "arguments": {
+      "destination": "Phú Quốc",
+      "date": "25/09/2026"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "destination": "Phú Quốc",
+      "date": "25/09/2026",
+      "data": {
+        "flights": [
+          {
+            "flight_id": "VJ501",
+            "airline": "Vietjet Air",
+            "departure_time": "10:30",
+            "price_vnd": 2100000,
+            "seats_available": 8
+          }
+        ],
+        "hotels": [
+          {
+            "hotel_id": "PQ-HL02",
+            "name": "Phu Quoc Ocean Villas",
+            "price_per_night_vnd": 2500000,
+            "rooms_available": 3
+          }
+        ]
+      }
+    },
+    "latency_ms": 993.23
+  },
+  {
+    "step": 2,
+    "query": "Tôi là Nguyễn Phúc Bảo, muốn đi du lịch Phú Quốc vào ngày 25/09/2026, hãy tìm chuyến bay phù hợp rồi đặt vé luôn cho tôi.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Tổng hợp kết quả từ MCP Server thành công.",
+    "output": "Kết quả tra cứu chuyến đi tới Phú Quốc ngày 25/09/2026: {\"flights\": [{\"flight_id\": \"VJ501\", \"airline\": \"Vietjet Air\", \"departure_time\": \"10:30\", \"price_vnd\": 2100000, \"seats_available\": 8}], \"hotels\": [{\"hotel_id\": \"PQ-HL02\", \"name\": \"Phu Quoc Ocean Villas\", \"price_per_night_vnd\": 2500000, \"rooms_available\": 3}]}",
+    "latency_ms": 10.0
+  },
+  {
+    "step": 1,
+    "query": "Hãy tra cứu chuyến bay đi thành phố Atlantis vào ngày 01/01/2099.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "search_travel_options",
+    "arguments": {
+      "destination": "Atlantis",
+      "date": "01/01/2099"
+    },
+    "observation": {
+      "status": "NOT_FOUND",
+      "message": "Không tìm thấy chuyến bay/phòng khách sạn nào đi 'Atlantis' vào ngày '01/01/2099'."
+    },
+    "latency_ms": 913.87
+  },
+  {
+    "step": 2,
+    "query": "Hãy tra cứu chuyến bay đi thành phố Atlantis vào ngày 01/01/2099.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Tổng hợp kết quả từ MCP Server thành công.",
+    "output": "Không tìm thấy chuyến bay/phòng khách sạn nào đi 'Atlantis' vào ngày '01/01/2099'.",
     "latency_ms": 10.0
   }
 ]

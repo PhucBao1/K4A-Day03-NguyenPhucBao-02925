@@ -1,6 +1,7 @@
 """
 🛠️ TOOL DEFINITIONS & EXECUTION BACKEND
 Mã nguồn chứa danh sách Tool Schemas (JSON Schema) và Execution Layer phục vụ cho MCP Server.
+Chủ đề: Trợ lý Du lịch Cá nhân hóa (Personal Travel Assistant).
 """
 
 import json
@@ -13,39 +14,59 @@ from typing import Dict, Any
 TOOLS_SCHEMA = [
     # Tool 1: Đã được định nghĩa mẫu sẵn cho Học viên tham khảo
     {
-        "name": "academic_query",
-        "description": "Tra cứu hồ sơ và thông tin học vụ của sinh viên VinUni bằng mã sinh viên.",
+        "name": "search_travel_options",
+        "description": "Tra cứu các chuyến bay và phòng khách sạn còn trống theo điểm đến và ngày đi.",
         "parameters": {
             "type": "object",
             "properties": {
-                "student_id": {
+                "destination": {
                     "type": "string",
-                    "description": "Mã sinh viên cần tra cứu (ví dụ: 'SV2026001')"
+                    "description": "Điểm đến cần tra cứu (ví dụ: 'Đà Nẵng')"
+                },
+                "date": {
+                    "type": "string",
+                    "description": "Ngày đi cần tra cứu, định dạng dd/mm/yyyy (ví dụ: '20/09/2026')"
                 }
             },
-            "required": ["student_id"]
+            "required": ["destination", "date"]
         }
     },
-    
+
     # --------------------------------------------------------------------------
-    # TODO 1.2: HỌC VIÊN HOÀN THIỆN TOOL SCHEMA CHO 'schedule_appointment'
+    # HỌC VIÊN HOÀN THIỆN TOOL SCHEMA CHO 'book_travel'
     # 🎯 YÊU CẦU THIẾT KẾ SCHEMA (JSON SCHEMA STANDARD):
-    # 1. Tool dùng để đặt lịch hẹn tư vấn học vụ với Cố vấn học tập VinUni.
+    # 1. Tool dùng để đặt vé máy bay / đặt phòng khách sạn cho chuyến đi.
     # 2. Thiết kế các tham số (properties) để LLM trích xuất:
-    #    - student_id (string): Mã sinh viên cần đặt lịch (ví dụ: 'SV2026001')
-    #    - datetime_str (string): Thời gian hẹn (ví dụ: '14:00 15/09/2026')
-    #    - advisor_name (string): Tên cố vấn học tập
+    #    - destination (string): Điểm đến của chuyến đi (ví dụ: 'Đà Nẵng')
+    #    - date (string): Ngày đi, định dạng dd/mm/yyyy (ví dụ: '20/09/2026')
+    #    - traveler_name (string): Tên hành khách cần đặt vé/phòng
+    #    - flight_id (string, không bắt buộc): Mã chuyến bay muốn đặt (ví dụ: 'VN209')
     # 3. Khai báo danh sách các trường bắt buộc (required).
     # --------------------------------------------------------------------------
     {
-        "name": "schedule_appointment",
-        "description": "Đặt lịch hẹn tư vấn học vụ với Cố vấn học tập VinUni.",
+        "name": "book_travel",
+        "description": "Đặt vé máy bay hoặc đặt phòng khách sạn cho một chuyến đi.",
         "parameters": {
             "type": "object",
             "properties": {
-                # TODO 1.2: Khai báo các thuộc tính tham số cho Tool tại đây...
+                "destination": {
+                    "type": "string",
+                    "description": "Điểm đến của chuyến đi (ví dụ: 'Đà Nẵng')"
+                },
+                "date": {
+                    "type": "string",
+                    "description": "Ngày đi, định dạng dd/mm/yyyy (ví dụ: '20/09/2026')"
+                },
+                "traveler_name": {
+                    "type": "string",
+                    "description": "Tên hành khách cần đặt vé/phòng"
+                },
+                "flight_id": {
+                    "type": "string",
+                    "description": "Mã chuyến bay muốn đặt, nếu người dùng chỉ định cụ thể (ví dụ: 'VN209')"
+                }
             },
-            "required": [] # TODO 1.2: Khai báo danh sách các trường bắt buộc tại đây...
+            "required": ["destination", "date", "traveler_name"]
         }
     }
 ]
@@ -55,57 +76,67 @@ TOOLS_SCHEMA = [
 # ==============================================================================
 
 MOCK_DATABASE = {
-    "SV2026001": {
-        "full_name": "Nguyễn Văn An",
-        "class": "AI-K4",
-        "gpa": 3.85,
-        "email": "an.nv@vinuni.edu.vn",
-        "status": "Đang học",
-        "advisor": "PGS.TS Nguyễn Văn A"
+    "Đà Nẵng": {
+        "20/09/2026": {
+            "flights": [
+                {"flight_id": "VN209", "airline": "Vietnam Airlines", "departure_time": "08:00", "price_vnd": 1850000, "seats_available": 12}
+            ],
+            "hotels": [
+                {"hotel_id": "DN-HL01", "name": "Danang Beach Resort", "price_per_night_vnd": 1200000, "rooms_available": 5}
+            ]
+        }
     },
-    "SV2026002": {
-        "full_name": "Trần Thị Bình",
-        "class": "AI-K4",
-        "gpa": 3.60,
-        "email": "binh.tt@vinuni.edu.vn",
-        "status": "Đang học",
-        "advisor": "TS. Lê Thị B"
+    "Phú Quốc": {
+        "25/09/2026": {
+            "flights": [
+                {"flight_id": "VJ501", "airline": "Vietjet Air", "departure_time": "10:30", "price_vnd": 2100000, "seats_available": 8}
+            ],
+            "hotels": [
+                {"hotel_id": "PQ-HL02", "name": "Phu Quoc Ocean Villas", "price_per_night_vnd": 2500000, "rooms_available": 3}
+            ]
+        }
     }
 }
 
 
-def execute_academic_query(student_id: str) -> str:
-    """Thực thi tra cứu học vụ theo mã sinh viên"""
-    student = MOCK_DATABASE.get(student_id.strip().upper())
-    if student:
+def execute_search_travel_options(destination: str, date: str) -> str:
+    """Thực thi tra cứu chuyến bay/khách sạn theo điểm đến và ngày đi"""
+    options = MOCK_DATABASE.get(destination.strip(), {}).get(date.strip())
+    if options:
         return json.dumps({
             "status": "SUCCESS",
-            "student_id": student_id,
-            "data": student
+            "destination": destination,
+            "date": date,
+            "data": options
         }, ensure_ascii=False)
     else:
         return json.dumps({
             "status": "NOT_FOUND",
-            "message": f"Không tìm thấy dữ liệu sinh viên có mã '{student_id}'"
+            "message": f"Không tìm thấy chuyến bay/phòng khách sạn nào đi '{destination}' vào ngày '{date}'."
         }, ensure_ascii=False)
 
 
-def execute_schedule_appointment(student_id: str, datetime_str: str, advisor_name: str = "PGS.TS Nguyễn Văn A") -> str:
-    """Thực thi đặt lịch hẹn tư vấn học vụ"""
+def execute_book_travel(destination: str, date: str, traveler_name: str, flight_id: str = None) -> str:
+    """Thực thi đặt vé máy bay / đặt phòng khách sạn"""
+    booking_ref = flight_id or destination[:2].upper()
     return json.dumps({
         "status": "SUCCESS",
-        "booking_id": f"BK-{student_id}-99",
-        "student_id": student_id,
-        "datetime": datetime_str,
-        "advisor": advisor_name,
-        "message": f"Đặt lịch thành công cho sinh viên {student_id} với {advisor_name} vào lúc {datetime_str}."
+        "booking_id": f"BK-{booking_ref}-{date.replace('/', '')}",
+        "destination": destination,
+        "date": date,
+        "traveler_name": traveler_name,
+        "flight_id": flight_id,
+        "message": (
+            f"Đặt {'vé chuyến bay ' + flight_id if flight_id else 'vé/phòng'} thành công cho "
+            f"hành khách {traveler_name} đi {destination} vào ngày {date}."
+        )
     }, ensure_ascii=False)
 
 
 # Router gọi tool thực tế
 TOOL_ROUTER = {
-    "academic_query": execute_academic_query,
-    "schedule_appointment": execute_schedule_appointment
+    "search_travel_options": execute_search_travel_options,
+    "book_travel": execute_book_travel
 }
 
 def dispatch_tool_call(tool_name: str, arguments: Dict[str, Any]) -> str:
